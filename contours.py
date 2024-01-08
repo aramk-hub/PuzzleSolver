@@ -41,3 +41,5 @@ plt.subplot(122),plt.imshow(thresh,cmap = 'gray')
 plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
 
 plt.show()
+
+# continuing
