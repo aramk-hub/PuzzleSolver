@@ -22,6 +22,9 @@
 
 import numpy as np
 import cv2 as cv
+import scipy
+import scipy.ndimage
+from skimage.util import img_as_ubyte
 from matplotlib import pyplot as plt
 
 ref_image = cv.imread('solution.jpg', cv.IMREAD_GRAYSCALE)
@@ -34,21 +37,21 @@ img = np.asarray(img, dtype="uint8") / 255.0
 h, w = ref_image.shape
 out_img = np.zeros((h, w))
 
+bin_img = np.zeros(img.shape)
+bin_img[img > 0.06] = 1.0
+opened_img=scipy.ndimage.morphology.binary_opening(bin_img, 
+                 structure=np.ones((3,3)), iterations=1, output=None, origin=0)
+opened_img=scipy.ndimage.morphology.binary_closing(opened_img, 
+             structure=np.ones((3,3)), iterations=1, output=None, origin=0)
 
-assert img is not None, "file could not be read, check with os.path.exists()"
+vis_img = img_as_ubyte(opened_img)
+im2, contours, hierarchy = cv.findContours(vis_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-ret, thresh = cv.threshold(img, 127, 255, 0)
-
-contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
 cv.drawContours(img, contours, -1, (255,255,0), 2)
-
-plt.subplot(121),plt.imshow(img,cmap = 'gray')
-plt.title('Original Image'), plt.xticks([]), plt.yticks([])
-
-plt.subplot(122),plt.imshow(thresh,cmap = 'gray')
-plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
-
+plt.imshow(im2,cmap=plt.cm.gray)
+plt.title("Pieces")
+plt.axis('off')
 plt.show()
 
 # continuing
