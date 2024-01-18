@@ -20,6 +20,7 @@
 # # -1 signifies drawing all contours 
 # cv.drawContours(image, contours, -1, (0, 255, 0), 3) 
 
+from weakref import ref
 import numpy as np
 import cv2 as cv
 import scipy
@@ -53,5 +54,29 @@ plt.imshow(im2,cmap=plt.cm.gray)
 plt.title("Pieces")
 plt.axis('off')
 plt.show()
+
+# Create the array of pieces by going through contours
+pieces = list()
+for i in range(0, len(contours)):
+    curr_contours = np.asarray(contours[i])
+    x,y,w,h = cv.boundingRect(curr_contours)
+    cv.rectangle(im2, (x,y), (x+w, y+h), (255, 255, 0), 2)
+    cropped = img[y:y+h, x:x+w]
+    pieces.append(cropped)
+
+plt.imshow(im2,cmap=plt.cm.gray)
+plt.axis('off')
+plt.show()
+
+# Create SIFT Detector 
+sift = cv.SIFT_create()
+
+ref_copy = img_as_ubyte(ref_copy)
+kp2, desc2 = sift.detectAndCompute(ref_copy, None)
+
+bf = cv.BFMatcher()
+
+# Begin Matching Sequence
+
 
 # continuing
