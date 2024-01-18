@@ -77,6 +77,16 @@ kp2, desc2 = sift.detectAndCompute(ref_copy, None)
 bf = cv.BFMatcher()
 
 # Begin Matching Sequence
+for piece in pieces:
+
+    piece = img_as_ubyte(piece)
+    kp1, desc1 = sift.detectAndCompute(piece, None)
+    matches = bf.knnMatch(desc1, desc2, k=2)
+
+    matches = list()
+    for m, n in matches:
+        if m.distance < 0.7 * n.distance:
+            matches.append(m)
 
 
 # continuing
