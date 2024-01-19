@@ -88,5 +88,35 @@ for piece in pieces:
         if m.distance < 0.7 * n.distance:
             matches.append(m)
 
+    MIN_MATCH_COUNT = 10
 
-# continuing
+    if len(matches) > 10:
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in matches]).reshape(-1,1,2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in matches]).reshape(-1,1,2)
+
+        M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
+        matches_mask = mask.ravel().tolist()
+
+        h,w = piece.shape
+        pts = np.float32([[0,0], [0,h-1], [w-1,h-1], [w-1, 0]]).reshape(-1,1,2)
+        dst = cv.perspectiveTransform(pts, M)
+
+        ref_copy = cv.polylines(ref_copy, [np.int32(dst)], True, 255, 3, cv.LINE_AA)
+
+    else:
+        print( "Not enough matches are found - {}/{}".format(len(matches), MIN_MATCH_COUNT) )
+        matchesMask = None
+
+    draw_params = dict(matchColor = (0,255,0),singlePointColor = None,matchesMask = matchesMask, 
+                   flags = cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    final = cv.drawMatches(piece, kp1, ref_copy, kp2, matches, None, flags=2)
+
+    plt.imshow(final)
+    plt.axis('off')
+    plt.show()
+
+plt.imshow(ref_copy, cmap = 'gray')
+plt.title("final image")
+plt.axis('off')
+plt.show()
